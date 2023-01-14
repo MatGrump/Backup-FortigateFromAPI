@@ -1,0 +1,25 @@
+
+#Trust any SSL cert
+add-type @"
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+    public class TrustAllCertsPolicy : ICertificatePolicy {
+        public bool CheckValidationResult(
+            ServicePoint srvPoint, X509Certificate certificate,
+            WebRequest request, int certificateProblem) {
+            return true;
+        }
+    }
+"@
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+
+$BackupPath = "c:\temp\FGBackup.bin"
+$ApiToken = "38k9x9Nx03NfmHyjkmryhzn5Ggprs0"
+
+$EndPoint = "https://192.168.1.254/api/v2/monitor/system/config/backup/?scope=global&amp;access_token=$ApiTocken"
+$header = @{ "Authorization" = "Bearer $ApiToken" }
+$backup = Invoke-RestMethod -Method GET -Uri $EndPoint -Headers $Header 
+
+New-Item $BackupPath
+
+Set-Content $BackupPath $backup
